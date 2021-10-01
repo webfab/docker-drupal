@@ -4,4 +4,4 @@ Use it has a starter for your Drupal Project
 # Commands
 Enter the PHP container
 ```bash
-docker exec -it dockerapache_php_1 bash
+docker exec -it dockerapache_php_3 bash
