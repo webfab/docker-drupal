@@ -1,0 +1,162 @@
+# Adopt version 2 syntax:
+#   https://docs.docker.com/compose/compose-file/#/versioning
+version: '2.2'
+
+volumes:
+    data:
+    esdata1:
+      
+services:
+###########################
+# Setup the Apache container
+###########################
+    httpd:
+        container_name: dockerapache_httpd_1
+        restart: always
+        image: httpd:2.4.25
+        ports:
+            - 80:80
+            - 443:443
+        volumes:
+            - ./apache/httpd.conf:/usr/local/apache2/conf/httpd.conf
+            - ./apache/vhosts/:/usr/local/apache2/conf/vhosts
+        volumes_from:
+            - php
+        depends_on:
+            - php
+        networks:
+          - backend
+         #   - mysql
+         #   - solr
+         #   - myadmin
+        #networks:
+            #testing_net:
+               # ipv4_address: 172.28.1.1
+
+###########################
+# Setup the PHP container
+###########################
+    php:
+        container_name: dockerapache_php_3
+        restart: always
+        build: ./php/
+        expose:
+            - 9000
+        volumes:
+            - ../www:/var/www/html
+            - ./php/ssmtp.conf:/etc/ssmtp/ssmtp.conf:ro
+            - ./php/php-mail.conf:/usr/local/etc/php/conf.d/mail.ini:ro
+            - ./php/etc:/usr/local/etc
+        networks:
+          - backend
+
+###########################
+# Setup the Database (MySQL) container
+###########################
+    mysql:
+        container_name: dockerapache_mysql_1
+        restart: always
+        hostname: mysql
+        image: mysql:5.7
+        ports:
+            - '3306:3306'
+        expose:
+            - 3306
+        volumes:
+            - ./data/mysql:/var/lib/mysql
+            - ./mysql/conf-mysql.cnf:/etc/mysql/mysql.conf.d/conf-mysql.cnf:ro
+        environment:
+            MYSQL_ROOT_PASSWORD: secret
+            MYSQL_DATABASE: 'DB_NAME'
+            MYSQL_USER: 'root'
+            MYSQL_PASSWORD: 'secret'
+        networks:
+          - backend
+        #networks:
+       #     testing_net:
+              #  ipv4_address: 172.28.1.3
+
+    myadmin:
+          image: phpmyadmin/phpmyadmin
+          ports:
+              - "8080:80"
+          links:
+            - mysql:mysql
+          environment:
+            PMA_HOSTS: mysql
+          networks:
+            - backend
+          #networks:
+           # testing_net:
+            #    ipv4_address: 172.28.1.4
+
+    #blackfire:
+          #image: blackfire/blackfire
+          #environment:
+            #Exposes the host BLACKFIRE_SERVER_ID and TOKEN environment variables.
+            #BLACKFIRE_SERVER_ID: a0073950-08bc-4e84-9f8b-c2d99b9361fd
+            #BLACKFIRE_SERVER_TOKEN: c7e6406cd8b36db18a897e39ebc76ab676dfb923c701ec011ed08ead10185b78
+            # You can also use global environment credentials :
+            # BLACKFIRE_SERVER_ID: SERVER-ID
+            # BLACKFIRE_SERVER_TOKEN: SERVER-TOKEN
+
+### REDIS
+    redis:
+      image: redis:3-alpine
+      # networks:
+       # - internal
+      restart: always
+      sysctls:
+        - "net.core.somaxconn=511"
+
+#######################
+# Setup Chomredriver
+#######################
+    mailhog:
+      image: mailhog/mailhog
+      restart: always
+      ports: 
+        - 1025:1025 # smtp server
+        - 8025:8025 # web ui
+      networks:
+        - backend
+###########################
+# Setup Solr container
+###########################
+    solr:
+        image: solr:7
+        container_name: solr
+        ports:
+          - "8983:8983"
+        volumes:
+          - ./search:/opt/solr/server/solr/mycores
+        restart: always
+        command:
+          - solr-precreate
+          - socooc
+        networks:
+          - backend
+
+
+###########################
+# Setup Solr memcache
+###########################
+    memcached:
+        image: sameersbn/memcached:1.5.6-2
+        ports:
+          - "11211:11211"
+        restart: always
+        networks:
+          - backend
+
+networks:
+  backend:
+#
+#networks:
+ # testing_net:
+  #  ipam:
+   #   driver: default
+    #  config:
+     #   - subnet: 172.28.0.0/16
+            
+
