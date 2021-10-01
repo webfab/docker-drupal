@@ -66,10 +66,10 @@ services:
             - ./data/mysql:/var/lib/mysql
             - ./mysql/conf-mysql.cnf:/etc/mysql/mysql.conf.d/conf-mysql.cnf:ro
         environment:
-            MYSQL_ROOT_PASSWORD: secret
-            MYSQL_DATABASE: 'DB_NAME'
-            MYSQL_USER: 'root'
-            MYSQL_PASSWORD: 'secret'
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DB_NAME}
+            MYSQL_USER: ${MYSQL_USERNAME}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
         networks:
           - backend
         #networks:
@@ -94,8 +94,8 @@ services:
           #image: blackfire/blackfire
           #environment:
             #Exposes the host BLACKFIRE_SERVER_ID and TOKEN environment variables.
-            #BLACKFIRE_SERVER_ID: a0073950-08bc-4e84-9f8b-c2d99b9361fd
-            #BLACKFIRE_SERVER_TOKEN: c7e6406cd8b36db18a897e39ebc76ab676dfb923c701ec011ed08ead10185b78
+            #BLACKFIRE_SERVER_ID: ${SERVER_ID}
+            #BLACKFIRE_SERVER_TOKEN: ${SERVER_TOKEN}
             # You can also use global environment credentials :
             # BLACKFIRE_SERVER_ID: SERVER-ID
             # BLACKFIRE_SERVER_TOKEN: SERVER-TOKEN

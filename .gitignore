@@ -1,3 +1,20 @@
 # Ignore IDEA
 .idea
 .idea/*
+
+# Ignore local env
+.env
+
+# Ignore Apache vhosts
+apache/vhosts/*
+
+# Ignore data
+data/*
+
+# Ignore php files
+php/conf.d/*
+php/etc/*
+php/scripts/*
+
+# Ignore search
+search/*
